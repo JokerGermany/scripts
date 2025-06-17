@@ -3,4 +3,4 @@ output=/media/HDD/steamexport/$(pwd | rev | cut -d '/' -f 1 | rev | cut -d "_" -
   --title="Enter the Output File-Name" \
   --text="Enter the Output File-Name:" \
   --entry-text "Output File-Name").mp4
-cvlc session.mpd --sout=#transcode{scodec=none}:std{access=file{no-overwrite},mux=mp4,dst='$output' --play-and-exit
+cvlc session.mpd --sout=#transcode{scodec=none}:std{access=file{no-overwrite},mux=mp4,dst="$output" --play-and-exit
