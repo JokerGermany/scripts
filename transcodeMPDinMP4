@@ -1,0 +1,1 @@
+cvlc session.mpd --sout=#transcode{scodec=none}:std{access=file{no-overwrite},mux=mp4,dst='blub.mp4' --play-and-exit
