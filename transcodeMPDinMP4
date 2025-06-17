@@ -1,1 +1,6 @@
-cvlc session.mpd --sout=#transcode{scodec=none}:std{access=file{no-overwrite},mux=mp4,dst='blub.mp4' --play-and-exit
+#!/bin/bash
+output=/media/HDD/steamexport/$(pwd | rev | cut -d '/' -f 1 | rev | cut -d "_" -f 3)_$(pwd | rev | cut -d '/' -f 1 | rev | cut -d "_" -f 2)_$(zenity --entry \
+  --title="Enter the Output File-Name" \
+  --text="Enter the Output File-Name:" \
+  --entry-text "Output File-Name").mp4
+cvlc session.mpd --sout=#transcode{scodec=none}:std{access=file{no-overwrite},mux=mp4,dst='$output' --play-and-exit
