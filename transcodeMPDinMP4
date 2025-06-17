@@ -1,6 +1,50 @@
 #!/bin/bash
-output=/media/HDD/steamexport/$(stat --format='%W' session.mpd | awk '{print strftime("%Y-%m-%d_%H-%M", $1)}')_$(pwd | rev | cut -d '/' -f 1 | rev | cut -d "_" -f 2)_$(zenity --entry \
-  --title="Enter the Output File-Name" \
-  --text="Enter the Output File-Name:" \
-  --entry-text "Output File-Name").mp4
-cvlc session.mpd --sout=#transcode{scodec=none}:std{access=file{no-overwrite},mux=mp4,dst="$output" --play-and-exit
+set -x
+# Pfad zum überwachten Dateisystem (z.B. /, /home, etc.)
+pfad="/media/HDD"
+# Freien Speicherplatz in Kilobyte ermitteln
+frei_kb=$(df --output=avail -k "$pfad" | tail -n 1)
+grenze_kb=$((10000000))
+if [ "$frei_kb" -lt "$grenze_kb" ]; then
+    echo "Weniger als 10GB Speicher frei auf $pfad. Skript wird beendet."
+    exit 1
+fi
+path=/home/jokergermany/.steam/debian-installation/userdata/xxx/gamerecordings/clips
+cd "$path"
+videoFolder=$(find . -maxdepth 1 -type d ! -name '.' -printf '%T@ %p\n' | sort -n | head -n 1 | cut -d' ' -f2-)
+cd ${videoFolder}/video/
+dirs=(*/)
+count=${#dirs[@]}
+if [ "$count" -eq 1 ]; then
+    cd "$(find . -maxdepth 1 -type d ! -name '.' | head -n 1)"
+    output=/media/HDD/steamexport/unfertig/$(stat --format='%W' session.mpd | awk '{print strftime("%Y-%m-%d_%H-%M", $1)}')_$(pwd | rev | cut -d '/' -f 1 | rev | cut -d "_" -f 2)_.mp4
+    cvlc session.mpd --sout=#transcode{scodec=none}:std{access=file{no-overwrite},mux=mp4,dst="$output" --play-and-exit
+    #Größe Outputdatei
+    echo $(stat -c%s "$output")
+    #Größe Outputdatei + Karenz
+    echo $(($(stat -c%s "$output") + 5000000))
+    #Größe Input
+    echo $(find . -type f -exec stat -c %s {} + | awk '{sum+=$1} END {print sum}')
+    if [[ $rc -eq 0  &&  `find . -type f -exec stat -c %s {} + | awk '{sum+=$1} END {print sum}'` -gt 999999999 ]]
+    then
+        output=$(($(stat -c%s "$output") + 10000000))
+    else
+        output=$(($(stat -c%s "$output") + 5000000))
+    fi    
+    if [[ $rc -eq 0  && `echo $output` -gt `find . -type f -exec stat -c %s {} + | awk '{sum+=$1} END {print sum}'` ]]
+    then  
+        cd "$path"
+        rm -rf $videoFolder
+        "$0" 
+    else
+        echo "The script did not run" >&2
+        exit 1
+    fi
+else
+  echo "Warnung: Es sind $count Ordner vorhanden. Vorgang abgebrochen."
+  exit 1
+fi
+#output=/media/HDD/steamexport/$(stat --format='%W' session.mpd | awk '{print strftime("%Y-%m-%d_%H-%M", $1)}')_$(pwd | rev | cut -d '/' -f 1 | rev | cut -d "_" -f 2)_$(zenity --entry \
+#  --title="Enter the Output File-Name" \
+#  --text="Enter the Output File-Name:" \
+#  --entry-text "Output File-Name").mp4
