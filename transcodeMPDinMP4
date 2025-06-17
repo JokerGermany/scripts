@@ -25,13 +25,16 @@ if [ "$count" -eq 1 ]; then
     echo $(($(stat -c%s "$output") + 5000000))
     #Größe Input
     echo $(find . -type f -exec stat -c %s {} + | awk '{sum+=$1} END {print sum}')
-    if [[ $rc -eq 0  &&  `find . -type f -exec stat -c %s {} + | awk '{sum+=$1} END {print sum}'` -gt 999999999 ]]
+    if [[ $rc -eq 0  &&  `find . -type f -exec stat -c %s {} + | awk '{sum+=$1} END {print sum}'` -gt 4999999999 ]]
     then
-        output=$(($(stat -c%s "$output") + 10000000))
+        outputsize=$(($(stat -c%s "$output") + 30000000))
+    elif [[ $rc -eq 0  &&  `find . -type f -exec stat -c %s {} + | awk '{sum+=$1} END {print sum}'` -gt 999999999 ]]
+    then
+        outputsize=$(($(stat -c%s "$output") + 10000000))
     else
-        output=$(($(stat -c%s "$output") + 5000000))
+        outputsize=$(($(stat -c%s "$output") + 5000000))
     fi    
-    if [[ $rc -eq 0  && `echo $output` -gt `find . -type f -exec stat -c %s {} + | awk '{sum+=$1} END {print sum}'` ]]
+    if [[ $rc -eq 0  && `echo $outputsize` -gt `find . -type f -exec stat -c %s {} + | awk '{sum+=$1} END {print sum}'` ]]
     then  
         cd "$path"
         rm -rf $videoFolder
