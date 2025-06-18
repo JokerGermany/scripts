@@ -18,7 +18,8 @@ count=${#dirs[@]}
 if [ "$count" -eq 1 ]; then
     cd "$(find . -maxdepth 1 -type d ! -name '.' | head -n 1)"
     output=/media/HDD/steamexport/unfertig/$(stat --format='%W' session.mpd | awk '{print strftime("%Y-%m-%d_%H-%M", $1)}')_$(pwd | rev | cut -d '/' -f 1 | rev | cut -d "_" -f 2)_.mp4
-    cvlc session.mpd --sout=#transcode{scodec=none}:std{access=file{no-overwrite},mux=mp4,dst="$output" --play-and-exit
+    #cvlc session.mpd --sout=#transcode{scodec=none}:std{access=file{no-overwrite},mux=mp4,dst="$output" --play-and-exit
+    ffmpeg -i session.mpd -codec copy "$output"
     #Größe Outputdatei
     echo $(stat -c%s "$output")
     #Größe Outputdatei + Karenz
@@ -28,6 +29,10 @@ if [ "$count" -eq 1 ]; then
     if [[ $rc -eq 0  &&  `find . -type f -exec stat -c %s {} + | awk '{sum+=$1} END {print sum}'` -gt 4999999999 ]]
     then
         outputsize=$(($(stat -c%s "$output") + 30000000))
+    elif [[ $rc -eq 0  &&  `find . -type f -exec stat -c %s {} + | awk '{sum+=$1} END {print sum}'` -gt 2499999999 ]]
+    then        
+        outputsize=$(($(stat -c%s "$output") + 15000000))
+        
     elif [[ $rc -eq 0  &&  `find . -type f -exec stat -c %s {} + | awk '{sum+=$1} END {print sum}'` -gt 999999999 ]]
     then
         outputsize=$(($(stat -c%s "$output") + 10000000))
